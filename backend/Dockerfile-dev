@@ -1,0 +1,54 @@
+FROM --platform=linux/amd64 node:22
+
+# Update system packages to fix vulnerabilities
+RUN apt-get update && apt-get upgrade -y && apt-get clean
+
+ARG NODE_ENV=development
+ENV NODE_ENV=$NODE_ENV
+
+# Definir token como build-arg
+ARG NPM_TOKEN=
+ENV NPM_TOKEN=$NPM_TOKEN
+
+# Install Corepack and enable Yarn 4
+RUN corepack enable && corepack prepare yarn@stable --activate
+
+# Tini is used as the entrypoint to handle signal forwarding
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "-g", "--"]
+
+ADD ./ /app
+WORKDIR /app
+
+# Change file user owner
+RUN chown -R node:node /app
+
+# Run the container under "node" user by default
+USER node
+
+# Expose port 8888 for running
+EXPOSE 8888
+
+# Expose port 9229 for running debugger
+EXPOSE 9229
+
+# # We don't need the standalone Chromium
+# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+
+# # Install Google Chrome Stable and fonts
+# # Note: this installs the necessary libs to make the browser work with Puppeteer.
+# RUN apt-get update && apt-get install gnupg wget -y && \
+#     wget --quiet --output-document=- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
+#     sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && \
+#     apt-get update && \
+#     apt-get install google-chrome-stable -y --no-install-recommends && \
+#     rm -rf /var/lib/apt/lists/*
+
+# RUN echo "Chrome Version: " && google-chrome --version
+# RUN echo "Chrome Location: " && whereis google-chrome
+
+#CMD ["yarn", "start:dev"]
+
+CMD ["./node_modules/.bin/nodemon", "--exec", "node --inspect=0.0.0.0:9229", "--require", "ts-node/register", "src/index.ts"]
