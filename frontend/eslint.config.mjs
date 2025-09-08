@@ -50,6 +50,7 @@ export default tsEslint.config({
         prefer: 'type-imports'
       }
     ],
+    '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false, arguments: false } }],
     '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     'no-var': 'error',
@@ -67,10 +68,10 @@ export default tsEslint.config({
       {
         groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index'], 'type'],
         pathGroups: [
-          { pattern: '@icons/**', group: 'internal' },
-          { pattern: '@components/**', group: 'internal' },
+          { pattern: '@contexts/**', group: 'internal' },
           { pattern: '@hooks/**', group: 'internal' },
-          { pattern: '@/**', group: 'internal' } // , position: 'before'
+          { pattern: '@modules/**', group: 'internal' },
+          { pattern: '@/**', group: 'internal' }
         ],
         pathGroupsExcludedImportTypes: ['type'],
         alphabetize: { order: 'asc', caseInsensitive: true },
@@ -79,6 +80,8 @@ export default tsEslint.config({
     ]
   }
 });
+
+// @todo: review this later
 
 // import { dirname } from "path";
 // import { fileURLToPath } from "url";
