@@ -54,7 +54,7 @@ export default function SignInPage() {
 
       <p className="mt-2 text-sm">
         Don't have an account?{' '}
-        <a className="text-blue-500" href="/signup">
+        <a className="text-blue-500" href="/user/signup">
           Sign Up
         </a>
       </p>

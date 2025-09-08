@@ -2,46 +2,73 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
-import api from '@/helpers/api';
+// import api from '@/helpers/api';
 import useAuth from '@hooks/useAuth';
 
 export default function SignUpPage() {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login } = useAuth();
+  const { signup } = useAuth();
 
   const handleSignUp = useCallback(async () => {
     if (password !== confirm) {
       setError('Passwords do not match');
+
       return;
     }
+    // try {
+    //   const userRes = await api.post('/users', { firstName, lastName, status: 'active' });
+    //   const sessionRes = await api.post('/sessions', { userId: userRes.data.id });
+    //   login(sessionRes.data.id, userRes.data);
+    //   router.push('/dashboard');
+    // } catch (e: unknown) {
+    //   setError((e as unknown).response?.data?.error || 'Error signing up');
+    // }
     try {
-      const userRes = await api.post('/users', { firstName, lastName, status: 'active' });
-      const sessionRes = await api.post('/sessions', { userId: userRes.data.id });
-      login(sessionRes.data.id, userRes.data);
+      await signup({ username, email, password, password_repeat: confirm, firstName, lastName });
+
       router.push('/dashboard');
     } catch (e: unknown) {
-      setError((e as unknown).response?.data?.error || 'Error signing up');
+      setError((e as Error).message);
     }
-  }, [confirm, firstName, lastName, login, password, router]);
+  }, [password, confirm, signup, username, email, firstName, lastName, router]);
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">
       <h1 className="mb-4 text-2xl">Sign Up</h1>
       <input
         className="mb-2 border p-2"
+        placeholder="Username"
+        value={username}
+        required
+        onChange={e => setUsername(e.target.value)}
+      />
+      <input
+        className="mb-2 border p-2"
+        placeholder="Email"
+        type="email"
+        value={email}
+        required
+        onChange={e => setEmail(e.target.value)}
+      />
+      <input
+        className="mb-2 border p-2"
         placeholder="First Name"
         value={firstName}
+        required
         onChange={e => setFirstName(e.target.value)}
       />
       <input
         className="mb-2 border p-2"
         placeholder="Last Name"
         value={lastName}
+        required
         onChange={e => setLastName(e.target.value)}
       />
       <input
@@ -49,6 +76,7 @@ export default function SignUpPage() {
         className="mb-2 border p-2"
         placeholder="Password"
         value={password}
+        required
         onChange={e => setPassword(e.target.value)}
       />
       <input
@@ -56,6 +84,7 @@ export default function SignUpPage() {
         className="mb-2 border p-2"
         placeholder="Confirm Password"
         value={confirm}
+        required
         onChange={e => setConfirm(e.target.value)}
       />
       {error && <p className="mb-2 text-red-500">{error}</p>}

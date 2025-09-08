@@ -26,12 +26,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = useCallback(
     async (usernameOrEmail: string, password: string) => {
       try {
-        const { data: session } = await api.post<Session>('/sessions', {
-          usernameOrEmail,
-          password
-        });
-
-        const { data: fetchedUser } = await api.get<User>(`/users/${session.userId}`);
+        const {
+          data: { user: fetchedUser, session }
+        } = await api.post<{ user: User; session: Session }>('/register', { usernameOrEmail, password });
+        // const { data: fetchedUser } = await api.get<User>(`/users/${session.userId}`);
         const sId = String(session.id);
 
         setSessionId(sId);
@@ -52,6 +50,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     [router]
   );
 
+  const signup = useCallback(
+    async (
+      userData: Omit<User, 'id' | 'status' | 'createdAt' | 'updatedAt'> & { password: string; password_repeat: string }
+    ) => {
+      const { username, email, password, password_repeat } = userData;
+      if (password !== password_repeat) {
+        throw new Error('Passwords do not match');
+      }
+
+      try {
+        const {
+          data: { user: newUser, session }
+        } = await api.post<{ user: User; session: Session }>('/register', {
+          username,
+          email,
+          password
+        });
+
+        console.log(newUser, session);
+
+        // login inmediatamente después de registrarse
+        // await login(username, password);
+      } catch (err: unknown) {
+        if (err && typeof err === 'object' && 'response' in err) {
+          const apiErr = err as { response?: { data?: { error: string } } };
+          throw new Error(apiErr.response?.data?.error ?? 'Error signing up');
+        }
+        throw new Error('Unexpected error');
+      }
+    },
+    []
+  );
+
   const logout = useCallback(async () => {
     if (!sessionId) {
       return;
@@ -69,7 +100,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [router, sessionId]);
 
-  const data = useMemo(() => ({ sessionId, user, login, logout }), [login, logout, sessionId, user]);
+  const data = useMemo(() => ({ sessionId, user, login, signup, logout }), [login, signup, logout, sessionId, user]);
 
   return <AuthContext value={data}>{children}</AuthContext>;
 };
@@ -78,7 +109,10 @@ export type AuthContextValue = {
   sessionId?: string;
   user?: User;
   login: (usernameOrEmail: string, password: string) => Promise<void>;
-  logout: () => void;
+  signup: (
+    userData: Omit<User, 'id' | 'status' | 'createdAt' | 'updatedAt'> & { password: string; password_repeat: string }
+  ) => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue>({} as AuthContextValue);
