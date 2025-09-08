@@ -1,4 +1,5 @@
 /* eslint-disable quotes */
+import cors from 'cors';
 import express from 'express';
 
 import prisma from './database.ts';
@@ -7,6 +8,17 @@ import type { User } from './database.ts';
 
 const app = express();
 const PORT = process.env.PORT || 8888;
+
+// Setup
+
+app.use(
+  cors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // access-control-allow-credentials:true
+    optionsSuccessStatus: 200
+  })
+);
 
 // --- User --- //
 
@@ -86,6 +98,10 @@ app.delete('/users/:id', async (req, res) => {
 // --- Sessions --- //
 
 app.post('/sessions', async (req, res) => {
+  if (!req.body) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
   const { userId } = req.body as { userId: string };
 
   try {
