@@ -30,3 +30,6 @@ keep on mind that we are using yarn4, so probably you will need `corepack enable
 Note:
 
 some validations can be missing, at backend level we should validate the user authenticated to confirm if can or not perform any action, etc
+
+
+Users are in `backend/prisma/seed.ts` but you can login with `tester/1234`
