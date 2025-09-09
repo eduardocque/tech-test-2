@@ -28,7 +28,7 @@ app.use(express.json());
 
 app.get('/users', async (_req, res) => {
   const users = await prisma.user.findMany();
-  res.json(users);
+  res.json(users.map(user => omit(user, ['password'])));
 });
 
 app.post('/users', async (req, res) => {
@@ -56,7 +56,7 @@ app.post('/users', async (req, res) => {
         updatedAt: new Date()
       }
     });
-    res.status(201).json(user);
+    res.status(201).json(omit(user, ['password']));
   } catch (e: unknown) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -83,7 +83,7 @@ app.patch('/users/:id', async (req, res) => {
         status: status || user.status
       }
     });
-    res.json(updatedUser);
+    res.json(omit(updatedUser, ['password']));
   } catch (e: unknown) {
     res.status(400).json({ error: (e as Error).message });
   }
