@@ -26,9 +26,21 @@ app.use(express.json());
 
 // --- User CRUD --- //
 
-app.get('/users', async (_req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users.map(user => omit(user, ['password'])));
+app.get('/users', async (req, res) => {
+  const { page = '1', pageSize = '10' } = req.query as { page?: string; pageSize?: string };
+  const users = await prisma.user.findMany({
+    skip: (Number(page) - 1) * Number(pageSize),
+    take: Number(pageSize),
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const totalUsers = await prisma.user.count();
+  const totalPages = Math.ceil(totalUsers / Number(pageSize));
+
+  res.json({
+    users: users.map(user => omit(user, ['password'])),
+    pagination: { page, pageSize, totalUsers, totalPages }
+  });
 });
 
 app.post('/users', async (req, res) => {

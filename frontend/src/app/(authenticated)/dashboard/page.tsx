@@ -14,8 +14,17 @@ const fetcher = <T = unknown,>(url: string) => api.get(url).then(res => res.data
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
-  const { data: users = [], mutate } = useSWR<User[]>('/users', fetcher<User[]>);
   const [page, setPage] = useState(1);
+  const { data, mutate } = useSWR<{
+    users: User[];
+    pagination: { page: number; pageSize: number; totalUsers: number; totalPages: number };
+  }>(
+    `/users?pageSize=6&page=${page}`,
+    fetcher<{
+      users: User[];
+      pagination: { page: number; pageSize: number; totalUsers: number; totalPages: number };
+    }>
+  );
 
   const handleToggleStatus = useCallback(
     async (id: number, status: 'active' | 'inactive') => {
@@ -69,7 +78,7 @@ export default function Dashboard() {
           </tr>
         </thead>
         <tbody>
-          {users.slice((page - 1) * 6, page * 6).map(userItem => (
+          {data?.users.slice((page - 1) * 6, page * 6).map(userItem => (
             <tr key={userItem.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
               <td className="border border-gray-300 p-2 dark:border-gray-700">{userItem.id}</td>
               <td className="border border-gray-300 p-2 dark:border-gray-700">{userItem.username}</td>
@@ -119,7 +128,7 @@ export default function Dashboard() {
         </button>
         <span>Page {page}</span>
         <button
-          disabled={users.length <= page * 6}
+          disabled={!data || data.users.length <= page * 6}
           onClick={handleClickNextPage}
           className="rounded border border-gray-300 bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
         >
