@@ -4,15 +4,14 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function seed() {
-  console.log('seed');
   await prisma.user.createMany({
     data: [
       {
-        username: 'carlosr',
-        email: 'carlos@example.com',
+        username: 'tester',
+        email: 'tester@example.com',
         password: '1234',
-        firstName: 'Carlos',
-        lastName: 'Rodriguez',
+        firstName: 'Tester',
+        lastName: 'Good',
         status: 'active',
         loginCounter: 0
       },
@@ -40,5 +39,3 @@ seed()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-console.log('hey');
