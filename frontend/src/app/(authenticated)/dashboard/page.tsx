@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 import api from '@/helpers/api';
@@ -24,23 +24,25 @@ export default function Dashboard() {
     [mutate]
   );
 
-  if (!user) {
-    router.push('/user/login');
+  const handleClickLogout = useCallback(() => {
+    void logout();
+  }, [logout]);
 
-    return null;
-  }
+  const handleClickPrevPage = useCallback(() => setPage(p => p - 1), []);
+
+  const handleClickNextPage = useCallback(() => setPage(p => p + 1), []);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/');
+    }
+  }, [router, user]);
 
   return (
     <div className="p-6">
       <div className="mb-4 flex justify-between">
         <h1 className="text-xl font-bold">User Management</h1>
-        <button
-          className="rounded bg-red-500 px-4 py-2 text-white"
-          onClick={() => {
-            void logout();
-            router.push('/user/login');
-          }}
-        >
+        <button className="rounded bg-red-500 px-4 py-2 text-white" onClick={handleClickLogout}>
           Log Out
         </button>
       </div>
@@ -74,11 +76,11 @@ export default function Dashboard() {
 
       {/* Paginación simple */}
       <div className="mt-4 flex gap-2">
-        <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+        <button disabled={page === 1} onClick={handleClickPrevPage}>
           Prev
         </button>
         <span>Page {page}</span>
-        <button disabled={users.length <= page * 6} onClick={() => setPage(p => p + 1)}>
+        <button disabled={users.length <= page * 6} onClick={handleClickNextPage}>
           Next
         </button>
       </div>

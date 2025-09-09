@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.removeItem('sessionId');
       localStorage.removeItem('user');
       document.cookie = 'sessionId=; Max-Age=0; path=/';
-      router.push('/user/login');
+      router.push('/');
     }
   }, [router, sessionId]);
 
