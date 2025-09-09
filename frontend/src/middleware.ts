@@ -16,7 +16,7 @@ export function middleware(req: NextRequest) {
 
   if (pathname.startsWith('/dashboard')) {
     if (!sessionId) {
-      return NextResponse.redirect(new URL('/signin', req.url));
+      return NextResponse.redirect(new URL('/user/login', req.url));
     }
   }
 

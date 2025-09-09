@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     async (
       userData: Omit<User, 'id' | 'status' | 'createdAt' | 'updatedAt'> & { password: string; password_repeat: string }
     ) => {
-      const { username, email, password, password_repeat } = userData;
+      const { username, email, password, password_repeat, firstName, lastName } = userData;
       if (password !== password_repeat) {
         throw new Error('Passwords do not match');
       }
@@ -65,7 +65,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } = await api.post<{ user: User; session: Session }>('/register', {
           username,
           email,
-          password
+          password,
+          firstName,
+          lastName
         });
 
         console.log(newUser, session);
@@ -96,7 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.removeItem('sessionId');
       localStorage.removeItem('user');
       document.cookie = 'sessionId=; Max-Age=0; path=/';
-      router.push('/signin');
+      router.push('/user/login');
     }
   }, [router, sessionId]);
 
