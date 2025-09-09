@@ -23,21 +23,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
+  const setUserSession = useCallback((user: User, session: Session) => {
+    const sId = String(session.id);
+    setSessionId(sId);
+    setUser(user);
+    localStorage.setItem('sessionId', sId);
+    localStorage.setItem('user', JSON.stringify(user));
+    document.cookie = `sessionId=${sId}; path=/`;
+  }, []);
+
   const login = useCallback(
     async (usernameOrEmail: string, password: string) => {
       try {
         const {
           data: { user: fetchedUser, session }
         } = await api.post<{ user: User; session: Session }>('/register', { usernameOrEmail, password });
-        // const { data: fetchedUser } = await api.get<User>(`/users/${session.userId}`);
-        const sId = String(session.id);
-
-        setSessionId(sId);
-        setUser(fetchedUser);
-        localStorage.setItem('sessionId', sId);
-        localStorage.setItem('user', JSON.stringify(fetchedUser));
-        document.cookie = `sessionId=${sId}; path=/`;
-
+        setUserSession(fetchedUser, session);
         router.push('/dashboard');
       } catch (err: unknown) {
         if (err && typeof err === 'object' && 'response' in err) {
@@ -47,7 +48,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         throw new Error('Unexpected error');
       }
     },
-    [router]
+    [router, setUserSession]
   );
 
   const signup = useCallback(
@@ -70,10 +71,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           lastName
         });
 
-        console.log(newUser, session);
-
-        // login inmediatamente después de registrarse
-        // await login(username, password);
+        setUserSession(newUser, session);
+        router.push('/dashboard');
       } catch (err: unknown) {
         if (err && typeof err === 'object' && 'response' in err) {
           const apiErr = err as { response?: { data?: { error: string } } };
@@ -82,7 +81,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         throw new Error('Unexpected error');
       }
     },
-    []
+    [router, setUserSession]
   );
 
   const logout = useCallback(async () => {
