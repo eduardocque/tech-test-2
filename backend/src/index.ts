@@ -22,6 +22,8 @@ app.use(
   })
 );
 
+app.use(express.json());
+
 // --- User CRUD --- //
 
 app.get('/users', async (_req, res) => {
