@@ -1,5 +1,12 @@
 node_modules
 # Keep environment variables out of version control
 .env
+yarn-error.log
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 /generated/prisma

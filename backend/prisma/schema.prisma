@@ -31,7 +31,7 @@ model User {
 model Session {
   id           Int       @id @default(autoincrement())
   userId       Int // foreign key
-  user         User      @relation(fields: [userId], references: [id])
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
   terminatedAt DateTime?
 }
