@@ -54,12 +54,14 @@ app.post('/users', async (req, res) => {
     return res.status(400).json({ error: "Status inválido. Debe ser 'active' o 'inactive'" });
   }
 
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   try {
     const user = await prisma.user.create({
       data: {
         firstName,
         lastName,
-        password, // needs to be encrypted
+        password: hashedPassword,
         status,
         username,
         email,

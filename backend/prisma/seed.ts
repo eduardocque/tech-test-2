@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -9,7 +10,7 @@ async function seed() {
       {
         username: 'tester',
         email: 'tester@example.com',
-        password: '1234',
+        password: await bcrypt.hash('1234', 10),
         firstName: 'Tester',
         lastName: 'Good',
         status: 'active',
@@ -18,7 +19,7 @@ async function seed() {
       {
         username: 'ana123',
         email: 'ana@example.com',
-        password: 'abcd',
+        password: await bcrypt.hash('abcd', 10),
         firstName: 'Ana',
         lastName: 'Silva',
         status: 'active',
@@ -27,7 +28,7 @@ async function seed() {
       {
         username: 'john_doe',
         email: 'john@example.com',
-        password: 'pass123',
+        password: await bcrypt.hash('pass123', 10),
         firstName: 'John',
         lastName: 'Doe',
         status: 'active',
@@ -36,7 +37,7 @@ async function seed() {
       {
         username: 'maria88',
         email: 'maria@example.com',
-        password: 'maria123',
+        password: await bcrypt.hash('maria123', 10),
         firstName: 'Maria',
         lastName: 'Lopez',
         status: 'inactive',
@@ -45,7 +46,7 @@ async function seed() {
       {
         username: 'peterp',
         email: 'peter@example.com',
-        password: 'peter456',
+        password: await bcrypt.hash('peter456', 10),
         firstName: 'Peter',
         lastName: 'Parker',
         status: 'active',
@@ -54,25 +55,25 @@ async function seed() {
       {
         username: 'linda_s',
         email: 'linda@example.com',
-        password: 'linda789',
+        password: await bcrypt.hash('linda789', 10),
         firstName: 'Linda',
         lastName: 'Smith',
         status: 'active',
         loginCounter: 0
       },
       {
-        username: 'carlos_r',
-        email: 'carlos@example.com',
-        password: 'carlos123',
-        firstName: 'Carlos',
-        lastName: 'Rodriguez',
+        username: 'tester2',
+        email: 'tester2@example.com',
+        password: await bcrypt.hash('1234', 10),
+        firstName: 'a',
+        lastName: 'b',
         status: 'inactive',
         loginCounter: 0
       },
       {
         username: 'emma_w',
         email: 'emma@example.com',
-        password: 'emma456',
+        password: await bcrypt.hash('emma456', 10),
         firstName: 'Emma',
         lastName: 'Watson',
         status: 'active',
@@ -81,7 +82,7 @@ async function seed() {
       {
         username: 'david_b',
         email: 'david@example.com',
-        password: 'david789',
+        password: await bcrypt.hash('david789', 10),
         firstName: 'David',
         lastName: 'Brown',
         status: 'active',
@@ -90,7 +91,7 @@ async function seed() {
       {
         username: 'sophia_k',
         email: 'sophia@example.com',
-        password: 'sophia123',
+        password: await bcrypt.hash('sophia123', 10),
         firstName: 'Sophia',
         lastName: 'King',
         status: 'inactive',
@@ -100,7 +101,7 @@ async function seed() {
     skipDuplicates: true
   });
 
-  console.log('Seed completado ✅');
+  console.log('Seed completed ✅');
 }
 
 seed()
