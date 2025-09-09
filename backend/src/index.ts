@@ -136,11 +136,8 @@ app.post('/sessions', async (req, res) => {
 app.post('/sessions/:id/terminate', async (req, res) => {
   const { id } = req.params;
   try {
-    const session = await prisma.session.update({
-      where: { id: Number(id) },
-      data: { terminatedAt: new Date() }
-    });
-    res.json(session);
+    await prisma.session.update({ where: { id: Number(id) }, data: { terminatedAt: new Date() } });
+    res.status(204).send();
   } catch (e: unknown) {
     res.status(400).json({ error: (e as Error).message });
   }
