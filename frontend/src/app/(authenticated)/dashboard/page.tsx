@@ -1,6 +1,6 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+
+import { useCallback, useState } from 'react';
 import useSWR from 'swr';
 
 import api from '@/helpers/api';
@@ -11,8 +11,7 @@ import type { User } from '@/types';
 const fetcher = <T = unknown,>(url: string) => api.get(url).then(res => res.data as T);
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
+  const { logout } = useAuth();
   const { data: users = [], mutate } = useSWR<User[]>('/users', fetcher<User[]>);
   const [page, setPage] = useState(1);
 
@@ -31,12 +30,6 @@ export default function Dashboard() {
   const handleClickPrevPage = useCallback(() => setPage(p => p - 1), []);
 
   const handleClickNextPage = useCallback(() => setPage(p => p + 1), []);
-
-  useEffect(() => {
-    if (!user) {
-      router.push('/');
-    }
-  }, [router, user]);
 
   return (
     <div className="p-6">

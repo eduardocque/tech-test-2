@@ -148,11 +148,45 @@ app.post('/sessions/:id/terminate', async (req, res) => {
 
 // Auth Commands
 
-// app.post('/login', async (req, res) => {
-//   if (!req.body) {
-//     return res.status(404).json({ error: 'Data missing' });
-//   }
-// });
+app.post('/login', async (req, res) => {
+  const { usernameOrEmail, password } = req.body as { usernameOrEmail: string; password: string };
+
+  if (!usernameOrEmail || !password) {
+    return res.status(400).json({ error: 'Username/email and password required' });
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ username: usernameOrEmail }, { email: usernameOrEmail }]
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (user.status !== 'active') {
+      return res.status(403).json({ error: 'Inactive users cannot log in' });
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Create Session
+    const session = await prisma.session.create({ data: { userId: user.id } });
+
+    // Increment login counter
+    await prisma.user.update({ where: { id: user.id }, data: { loginCounter: { increment: 1 } } });
+
+    return res.json({ user, session });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 app.post('/register', async (req, res) => {
   const { username, email, password, firstName, lastName } = req.body as {
@@ -192,6 +226,36 @@ app.post('/register', async (req, res) => {
     const session = await prisma.session.create({ data: { userId: user.id } });
 
     return res.status(201).json({ user: omit(user, ['password', 'loginCounter']), session });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/logout', async (req, res) => {
+  const { sessionId } = req.body as { sessionId: string };
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID required' });
+  }
+
+  try {
+    const session = await prisma.session.findUnique({ where: { id: Number(sessionId) } });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    if (session.terminatedAt) {
+      return res.status(400).json({ error: 'Session already terminated' });
+    }
+
+    const updated = await prisma.session.update({
+      where: { id: Number(sessionId) },
+      data: { terminatedAt: new Date() }
+    });
+
+    return res.json({ message: 'Logged out', session: updated });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });

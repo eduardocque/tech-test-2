@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const {
           data: { user: fetchedUser, session }
-        } = await api.post<{ user: User; session: Session }>('/register', { usernameOrEmail, password });
+        } = await api.post<{ user: User; session: Session }>('/login', { usernameOrEmail, password });
         setUserSession(fetchedUser, session);
         router.push('/dashboard');
       } catch (err: unknown) {
