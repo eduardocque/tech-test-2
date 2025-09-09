@@ -31,7 +31,7 @@ app.get('/users', async (req, res) => {
   const users = await prisma.user.findMany({
     skip: (Number(page) - 1) * Number(pageSize),
     take: Number(pageSize),
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'asc' }
   });
 
   const totalUsers = await prisma.user.count();
